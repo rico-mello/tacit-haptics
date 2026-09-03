@@ -1,0 +1,85 @@
+# ==================================================================================================
+# GENERAL SETTINGS
+# ==================================================================================================
+
+# Package type. Must be plugin4 for plugins.
+type: plugin4
+
+# Name that identifies the plugin.
+name: Tacit
+
+# Plugin name that is shown to the user.
+displayName: Tacit
+
+# Short description of the plugin.
+description: The state of a long-running task, reported through the thumb. Any writer that can append a line to a file can use it.
+
+# Name of the plugin library file.
+pluginFileName: TacitPlugin.dll
+
+# Plugin version.
+version: 1.0
+
+# Author of the plugin. The author can be a company or an individual developer.
+author: rmello
+
+# Copyright information.
+copyright: Copyright © 2026 rmello. All rights reserved.
+
+
+# ==================================================================================================
+# PLUGIN PROPERTIES
+# ==================================================================================================
+
+# Location of plugin files on Windows (relative to the plugin base directory).
+# This parameter is required to support Windows.
+pluginFolderWin: bin
+
+# v1 declares Windows only. The code carries no Windows assumption and the
+# channel resolves per platform, but the plugin has never been run on macOS,
+# and the Marketplace guidelines require testing what is declared. Restore
+# `pluginFolderMac: bin` after a real macOS run.
+
+# List of devices the plugin is optimized for.
+supportedDevices:
+    # ActionsRing is the MX Master 4's ring device (DeviceType.Loupedeck72) —
+    # the only device with plugin-extensible haptics, and the only one this
+    # plugin has been tested on. The accepted names live in the DLL's
+    # DeviceTypeAliases enum; families are bitmasks, so LogitechCreativeFamily
+    # would widen this to the MX Creative Keypad and Dialpad in one line if
+    # they are ever tested.
+    - ActionsRing
+
+# List of plugin capabilities.
+pluginCapabilities:
+    # Required to ship events/extra/eventMapping.yaml.
+    - HasHapticMapping
+
+    # Deliberately NOT declared: HasApplication. Linking a plugin to an
+    # application ties its activation to foreground focus, and the whole point
+    # here is to reach someone who is working somewhere else.
+    #- HasApplication
+    #- ActivatesApplication
+
+# Minimum Loupedeck version supported by the plugin.
+minimumLoupedeckVersion: 6.0
+
+
+# ==================================================================================================
+# LOUPEDECK MARKETPLACE SETTINGS
+# ==================================================================================================
+
+# Name of the license that the plugin is licensed under. Select the one that you prefer.
+# NOTE: GPL license is not compatible with Loupedeck Marketplace.
+license: MIT
+
+# URL of the plugin license.
+licenseUrl: https://opensource.org/licenses/MIT
+
+# URL of the support page where the users can send improvement suggestions and report bugs.
+# The URL is shown in Loupedeck Marketplace. The page can be for example a GitHub issues page.
+# NOTE: This setting is recommended when publishing the plugin in Loupedeck Marketplace.
+#supportPageUrl: https://github.com/myusername/myplugin/issues
+
+# URL of the plugin homepage. The URL is shown in Loupedeck Marketplace.
+#homePageUrl: https://github.com/myusername/myplugin

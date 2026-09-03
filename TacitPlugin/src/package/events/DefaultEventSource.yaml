@@ -1,0 +1,35 @@
+# The semantic layer, declared.
+#
+# Five names. Not five waveforms — five meanings. What each one feels like is
+# decided one layer down, in extra/eventMapping.yaml, and can be changed there
+# without touching a line of code.
+#
+# That separation is the point of the whole project. The SDK already ships the
+# mapping layer and the fifteen primitives; what it does not ship is a set of
+# shared names that mean the same thing across plugins by different authors.
+# Without them, every author picks alone and the user's one thumb receives a
+# different language from every plugin they install.
+
+displayName: Tacit
+description: State of a long-running task, reported through the thumb
+iconFile: DefaultEventSource.svg
+events:
+    - name: taskStarted
+      displayName: Task started
+      description: A long task has begun. Fires once, and establishes what every later pulse is about
+
+    - name: taskTick
+      displayName: Task running
+      description: The task is still alive. The beat, not a message — its absence is what carries meaning
+
+    - name: taskNeedsInput
+      displayName: Task needs you
+      description: The task cannot continue without an answer. The only state allowed to interrupt
+
+    - name: taskCompleted
+      displayName: Task completed
+      description: Finished, and it worked
+
+    - name: taskFailed
+      displayName: Task failed
+      description: Ended, and it did not work

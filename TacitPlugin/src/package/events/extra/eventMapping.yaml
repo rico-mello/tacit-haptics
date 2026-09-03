@@ -1,0 +1,41 @@
+# Semantic name -> shipped waveform. The mapping layer.
+#
+# Every choice here is provisional and meant to be revised against real hands.
+# It lives in configuration rather than in code precisely so that revising it
+# after user testing is an edit, not a rebuild.
+#
+# The reasoning, from notes/vibrotactile-perception.md:
+#
+#   Rhythm identifies at ~93% and pulse count at ~90%. Amplitude sits at ~70%,
+#   is named the hardest dimension to encode, and degrades further near the
+#   perception threshold — which is exactly the Subtle intensity setting a user
+#   in flow would keep. So: encode on time, not on texture.
+#
+#   The perceptual budget is not spread evenly. Position in the sequence
+#   disambiguates almost everything — you cannot receive "completed" before
+#   "started". The one genuinely hard call is completed against failed, at a
+#   moment the user is already expecting something. That pair gets the budget.
+#
+# Which is why completed and failed differ in SHAPE, not character: one pulse
+# against three. The three-pulse figure is built in TaskRunner.cs, because the
+# fifteen primitives cannot be authored — but their sequencing is free.
+#
+# One binding constraint: `completed` and `mad` are not the pair. They were
+# reported as the two closest patterns on the device, and they are the two
+# states that must never be confused. See notes/waveform-palette.md.
+
+haptics:
+    taskStarted:
+        DEFAULT: sharp_state_change
+
+    taskTick:
+        DEFAULT: subtle_collision
+
+    taskNeedsInput:
+        DEFAULT: knock
+
+    taskCompleted:
+        DEFAULT: completed
+
+    taskFailed:
+        DEFAULT: angry_alert

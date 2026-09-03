@@ -1,0 +1,12 @@
+<Project>
+    <PropertyGroup>
+        <LangVersion>latest</LangVersion>
+        <!-- Both paths are pinned to this file's directory rather than to
+             $(SolutionDir), which resolves differently depending on where
+             the build is invoked from. Once two obj/ trees exist the
+             project fails to compile from either location, with eight
+             CS0579 duplicate-attribute errors. -->
+        <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)obj\</BaseIntermediateOutputPath>
+        <BaseOutputPath>$(MSBuildThisFileDirectory)..\bin\</BaseOutputPath>
+    </PropertyGroup>
+</Project>
