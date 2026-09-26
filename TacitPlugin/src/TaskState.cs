@@ -46,8 +46,9 @@ namespace Loupedeck.TacitPlugin
         Completed,
 
         /// The task ended, and it did not work. Must never be confusable with
-        /// Completed -- see notes/waveform-palette.md for why that pair is the
-        /// one the perceptual budget gets spent on.
+        /// Completed. Position in the sequence tells most pairs apart, but these
+        /// two hold the same position, at a moment an ending is already
+        /// expected -- so this is the pair the perceptual budget gets spent on.
         Failed,
     }
 
