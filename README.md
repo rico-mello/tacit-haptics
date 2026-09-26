@@ -82,8 +82,8 @@ hand, and each logs what it plays to
   not the hand, and not whoever typed the word.
 - `lab` plays a completion pulse as a reference, then four versions of the
   failure figure five seconds apart: 3 pulses at 220 ms (the superseded
-  gap), the default 3 at 450 ms, 3 at 700 ms, and high contrast's 4 at
-  600 ms.
+  gap), the default 3 at 450 ms, 3 at 700 ms, and the 4 at 600 ms that
+  **Push them apart** plays.
 - `insist` plays the needsInput escalation and, unlike `escalate`, does not
   stop on its own: it contracts to its floor and holds there until
   `answered` is written.
