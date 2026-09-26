@@ -48,7 +48,7 @@ namespace Loupedeck.TacitPlugin
         // generating it -- the tester's own agent turns arrive in the same
         // thumb as the stimuli, and the participant has no way to tell them
         // apart. Muting suspends writer-driven tasks while leaving deliberate
-        // triggers working. See notes/testing-an-ambient-signal.md.
+        // triggers working.
         private Boolean _muted;
 
         public StateChannel(Action<String> raise, Func<TacitOptions> options, Action demo, Action flip, Action lab, Action escalate, Action insist, Action answered)
@@ -308,7 +308,7 @@ namespace Loupedeck.TacitPlugin
                 // A terminal or progress word for a task we never saw start is
                 // dropped on purpose. Without a start there is no referent, and
                 // a pulse with nothing to attribute it to reads as a malfunction
-                // rather than as information. See notes/haptic-referent.md.
+                // rather than as information.
             }
         }
 

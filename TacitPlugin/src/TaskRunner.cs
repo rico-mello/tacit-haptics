@@ -15,8 +15,6 @@ namespace Loupedeck.TacitPlugin
     // project when the next beat is due, and a beat that does not arrive is
     // then itself an event. Timing on this platform holds to 14 ms over a
     // nominal 10 s, so the projection is reliable enough to build on.
-    //
-    // See notes/cadence-and-silence.md and decisions 11, 12, 13, 21.
 
     internal sealed class TaskRunner : IDisposable
     {
