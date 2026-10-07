@@ -32,7 +32,11 @@
         private const String CtlDemo = "playRun";
 
         public TacitSettingsAction()
-            : base(DeviceType.All)
+            // The Actions Ring of the MX Master 4, and nothing else: the device the
+            // manifest declares (supportedDevices: ActionsRing, which the SDK parses
+            // to Loupedeck72). DeviceType.All put this action on devices Tacit was
+            // never designed or tested for, such as the MX Creative Keypad.
+            : base(DeviceType.Loupedeck72)
         {
             this.DisplayName = "Tacit settings";
             this.Description = "How long before a task is worth telling you about, and how often it reminds you. Both answers are personal - nobody can guess them for you.";

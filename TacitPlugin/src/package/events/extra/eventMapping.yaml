@@ -4,7 +4,7 @@
 # It lives in configuration rather than in code precisely so that revising it
 # after user testing is an edit, not a rebuild.
 #
-# The reasoning, from notes/vibrotactile-perception.md:
+# The reasoning, from the published vibrotactile perception research:
 #
 #   Rhythm identifies at ~93% and pulse count at ~90%. Amplitude sits at ~70%,
 #   is named the hardest dimension to encode, and degrades further near the
@@ -22,7 +22,7 @@
 #
 # One binding constraint: `completed` and `mad` are not the pair. They were
 # reported as the two closest patterns on the device, and they are the two
-# states that must never be confused. See notes/waveform-palette.md.
+# states that must never be confused.
 
 haptics:
     taskStarted:

@@ -368,7 +368,7 @@
 
             var variants = new (String Label, Int32 Count, Int32 GapMs)[]
             {
-                ("A  3 pulses @ 220ms  (superseded - decision 24)", 3, 220),
+                ("A  3 pulses @ 220ms  (superseded)", 3, 220),
                 (Variant("B", shipped, "current default"),
                     shipped.FailurePulses, (Int32)shipped.FigureGap.TotalMilliseconds),
                 ("C  3 pulses @ 700ms", 3, 700),
