@@ -35,8 +35,16 @@ announced at all — most fast tasks shouldn't have spoken in the first place.
 
 ## Install
 
-**From the Logi Marketplace** — search for *Tacit*. *(Pending review; until
-it is listed, build from source below.)*
+**From the Logi Marketplace, inside Logi Options+.** In Options+, open the
+**MX Master 4** → click the **Haptic feedback** card → **Modify settings** →
+**INSTALL AND UNINSTALL PLUGINS** → **FIND MORE FROM MARKETPLACE**, find
+**Tacit** and press **INSTALL**. The
+[web listing](https://marketplace.logi.com/plugin/Tacit/en) describes the
+plugin; installing works from inside Options+.
+
+Then check it is on: in the same **Modify settings** panel, under **Enable
+haptic for app plugins**, make sure **Tacit** is switched on. To configure it
+and feel the demo run, see [Settings](#settings).
 
 **From source:**
 
@@ -47,7 +55,9 @@ dotnet build TacitPlugin/src/TacitPlugin.csproj
 The build deploys the plugin to the Logi Plugin Service and reloads it
 automatically. If another copy of Tacit is already loaded from a different
 folder, the reload a build sends is refused as "already loaded" and the old
-copy keeps running. Requirements on the machine: Options+ at its default path
+copy keeps running. A copy installed from the Marketplace counts: uninstall
+it first (**INSTALL AND UNINSTALL PLUGINS** → the Tacit card → **⋮** →
+**Uninstall**). Requirements on the machine: Options+ at its default path
 (the build references its `PluginApi.dll`), and the folder
 `%LOCALAPPDATA%\Logi\LogiPluginService\Plugins\` existing (create it once if
 this is your first side-loaded plugin).
