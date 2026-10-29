@@ -46,6 +46,13 @@ Then check it is on: in the same **Modify settings** panel, under **Enable
 haptic for app plugins**, make sure **Tacit** is switched on. To configure it
 and feel the demo run, see [Settings](#settings).
 
+**If Tacit goes quiet after a Windows restart.** After some restarts, Tacit
+drops out of **Enable haptic for app plugins**, and its pulses stop, although
+the plugin is still installed and running. It looks like a platform issue at
+sign-in, not a setting, and it has been reported to Logitech. To restore it,
+press Win+R and run `loupedeck:plugin/Tacit/reload`. Tacit returns to the
+list and works until the next restart.
+
 **From source:**
 
 ```
