@@ -54,6 +54,7 @@
         public override void Load()
         {
             this.Options = TacitOptions.Load(this.ReadOption);
+            this.ShowOptionsAsDefaults();
 
             // Registration has to happen here: doing it in the constructor
             // throws, and the service disables the plugin.
@@ -84,17 +85,36 @@
         private String ReadOption(String key) =>
             this.TryGetPluginSetting(key, out var value) ? value : null;
 
-        internal void SaveOption(String key, String value)
+        // Writes only what differs from the running settings, so a value the
+        // user never changed keeps following the code's default.
+        internal void SaveOptions(TacitOptions chosen)
         {
             try
             {
-                this.SetPluginSetting(key, value);
+                foreach (var (key, value) in chosen.Settings().Except(this.Options.Settings()))
+                {
+                    this.SetPluginSetting(key, value);
+                }
+
                 this.Options = TacitOptions.Load(this.ReadOption);
                 PluginLog.Info($"[tacit] settings: {this.Options}");
             }
             catch (Exception ex)
             {
-                PluginLog.Error(ex, $"[tacit] could not save {key}");
+                PluginLog.Error(ex, "[tacit] could not save the settings");
+            }
+
+            this.ShowOptionsAsDefaults();
+        }
+
+        // A ring slot that has never been saved opens on the settings action's
+        // defaults, so they carry the running values. The SDK constructs the
+        // action before it calls Load.
+        private void ShowOptionsAsDefaults()
+        {
+            foreach (var action in this.ActionEditorCommands.GetActions().OfType<TacitSettingsAction>())
+            {
+                action.ShowAsDefaults(this.Options);
             }
         }
 
@@ -104,7 +124,10 @@
         // teaching is defined relationally -- "needs you" is a pulse OFF THE
         // BEAT, and a violation of a rhythm cannot be recognised without the
         // rhythm. A sample teaches a word; the meaning is in the sentence.
-        internal void PlayDemoRun()
+        internal void PlayDemoRun() => this.PlayDemoRun(this.Options);
+
+        // The settings dialog plays it with what the dialog shows, saved or not.
+        internal void PlayDemoRun(TacitOptions opts)
         {
             lock (this._demoGate)
             {
@@ -165,7 +188,6 @@
             };
 
             var raise = this.Raise;
-            var opts = this.Options;
 
             ThreadPool.QueueUserWorkItem(_ =>
             {
@@ -430,9 +452,8 @@
 
         // Fired when the contrast setting changes, so the difference is felt at
         // the moment it is chosen instead of being described in a tooltip.
-        internal void PlayContrastSample()
+        internal void PlayContrastSample(TacitOptions opts)
         {
-            var opts = this.Options;
             Sequence.Pulses(this.Raise, TaskStateParser.EventName(TaskState.Failed), opts.FailurePulses, opts.FigureGap);
         }
 

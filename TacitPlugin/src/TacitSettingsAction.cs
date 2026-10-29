@@ -22,6 +22,11 @@
     // A second consequence, and it is not hypothetical: bind this twice and you
     // get two panels writing the same global settings, because the editor was
     // designed for per-binding parameters rather than plugin-wide ones.
+    //
+    // A third: each slot keeps the values it was saved
+    // with and opens on them, whatever is running, and SetValue when the dialog
+    // opens does not change that. So SAVE makes what the dialog shows the
+    // running settings, and CANCEL changes nothing.
 
     public class TacitSettingsAction : ActionEditorCommand
     {
@@ -30,6 +35,25 @@
         private const String CtlHeartbeatOn = "heartbeatOn";
         private const String CtlContrast = "highContrast";
         private const String CtlDemo = "playRun";
+
+        private static readonly Dictionary<String, String> ControlFor = new Dictionary<String, String>
+        {
+            [TacitOptions.KeyQuietWindow] = CtlQuiet,
+            [TacitOptions.KeyHeartbeat] = CtlHeartbeat,
+            [TacitOptions.KeyHeartbeatOn] = CtlHeartbeatOn,
+            [TacitOptions.KeyHighContrast] = CtlContrast,
+        };
+
+        // Kept so that their defaults can follow the running values.
+        private readonly ActionEditorNumberSelector _quiet;
+        private readonly ActionEditorNumberSelector _heartbeat;
+        private readonly ActionEditorCheckbox _heartbeatOn;
+        private readonly ActionEditorCheckbox _contrast;
+
+        // What the last dialog showed, set when it opens and kept until the next
+        // one opens. Null until a dialog has opened since the plugin loaded.
+        private readonly Object _edit = new Object();
+        private TacitOptions _shown;
 
         public TacitSettingsAction()
             // The Actions Ring of the MX Master 4, and nothing else: the device the
@@ -43,7 +67,7 @@
             this.GroupName = "Tacit";
 
             // Question 1. The most personal setting there is.
-            this.ActionEditor.AddControlEx(new ActionEditorSlider(
+            this._quiet = this.ActionEditor.AddControlEx(new ActionEditorSlider(
                     CtlQuiet,
                     "Stay quiet for",
                     "A task that finishes inside this window is one you could have just watched. It is never announced at all - not its start, not its end.")
@@ -59,14 +83,14 @@
                 .SetFormatString("{0}s"));
 
             // Question 2.
-            this.ActionEditor.AddControlEx(new ActionEditorSlider(
+            this._heartbeat = this.ActionEditor.AddControlEx(new ActionEditorSlider(
                     CtlHeartbeat,
                     "Then remind you every",
                     "The beat that means it is still alive. It has to be regular - a beat you can predict is what makes a missing beat mean something.")
                 .SetValues(5, 60, 15, 5)
                 .SetFormatString("{0}s"));
 
-            this.ActionEditor.AddControlEx(new ActionEditorCheckbox(
+            this._heartbeatOn = this.ActionEditor.AddControlEx(new ActionEditorCheckbox(
                     CtlHeartbeatOn,
                     "Keep the beat",
                     "Turn this off to feel only the start and the end.")
@@ -75,7 +99,7 @@
             this.ActionEditor.AddControlEx(new ActionEditorSeparator("sep1"));
 
             // Question 3. The accessibility carve-out.
-            this.ActionEditor.AddControlEx(new ActionEditorCheckbox(
+            this._contrast = this.ActionEditor.AddControlEx(new ActionEditorCheckbox(
                     CtlContrast,
                     "Push them apart",
                     "This changes how distinct the patterns feel, never what they mean - done means done on every machine. Longer figures and wider gaps, for hands that need more separation. It does not make anything louder; use the Options+ intensity setting for that.")
@@ -111,8 +135,28 @@
 
             this.ActionEditor.Started += this.OnEditorStarted;
             this.ActionEditor.ControlValueChanged += this.OnControlValueChanged;
+            this.ActionEditor.Finished += this.OnEditorFinished;
             this.DiagControls("after-ctor");
         }
+
+        // A slot that has never been saved opens on the controls' defaults, and
+        // the service reads them off these objects each time it sends the action
+        // to Options+. So the defaults carry the running values.
+        internal void ShowAsDefaults(TacitOptions o)
+        {
+            SetDefault(this._quiet, o.QuietWindowSeconds);
+            SetDefault(this._heartbeat, o.HeartbeatSeconds);
+            this._heartbeatOn.SetDefaultValue(o.HeartbeatEnabled);
+            this._contrast.SetDefaultValue(o.HighContrast);
+        }
+
+        private static void SetDefault(ActionEditorNumberSelector slider, Int32 value) =>
+            slider.SetValues(slider.MinimumValue, slider.MaximumValue, Math.Clamp(value, slider.MinimumValue, slider.MaximumValue), slider.Step);
+
+        // What the dialog shows, over `fallback` for any value it did not send.
+        // Options+ sends the dialog's values with each editor event.
+        private static TacitOptions Read(ActionEditorState state, TacitOptions fallback) =>
+            TacitOptions.Load(key => state.GetControlValue(ControlFor[key]), fallback);
 
 
         // Diagnostic. Count the controls at the two moments that matter: at the
@@ -142,24 +186,36 @@
 
         private TacitPlugin Host => this.Plugin as TacitPlugin;
 
-        // Load the live values in, so the panel shows what is actually running
-        // rather than the defaults.
+        // The dialog cannot be told what to open on. Options+ opens it on the
+        // slot's saved parameters, or on the controls' defaults for a slot never
+        // saved.
+        // 1.0.2 called SetValue here for all four controls. SetValue only queues
+        // a "setValue" message in the reply to this event, Options+ does not
+        // apply it, and the dialog showed 20s and 15s while 90s and 10s ran.
+        //
+        // So read what it shows, and log it beside what is running.
         private void OnEditorStarted(Object sender, ActionEditorStartedEventArgs e)
         {
             this.DiagControls("on-started");
             PluginLog.Info($"[tacit] EDITOR on-started: Plugin={(this.Plugin == null ? "NULL" : this.Plugin.GetType().Name)}");
-            var o = this.Host?.Options;
-            if (o == null)
+            var running = this.Host?.Options;
+            if (running == null)
             {
                 return;
             }
 
-            e.ActionEditorState.SetValue(CtlQuiet, o.QuietWindowSeconds.ToString());
-            e.ActionEditorState.SetValue(CtlHeartbeat, o.HeartbeatSeconds.ToString());
-            e.ActionEditorState.SetValue(CtlHeartbeatOn, o.HeartbeatEnabled.ToString());
-            e.ActionEditorState.SetValue(CtlContrast, o.HighContrast.ToString());
+            var shown = Read(e.ActionEditorState, running);
+            lock (this._edit)
+            {
+                this._shown = shown;
+            }
+
+            PluginLog.Info($"[tacit] EDITOR shows {shown} | running {running}");
         }
 
+        // A change is held, not saved. Options+ reports each one as it happens,
+        // before the user has pressed SAVE or CANCEL; 1.0.2 saved it here, so
+        // CANCEL could not undo it.
         private void OnControlValueChanged(Object sender, ActionEditorControlValueChangedEventArgs e)
         {
             var host = this.Host;
@@ -168,20 +224,17 @@
                 return;
             }
 
-            if (e.ControlName == CtlDemo)
+            TacitOptions shown;
+            lock (this._edit)
             {
-                host.PlayDemoRun();
-                return;
+                shown = this._shown = Read(e.ActionEditorState, this._shown ?? host.Options);
             }
 
-            var value = e.ActionEditorState.GetControlValue(e.ControlName);
-
-            switch (e.ControlName)
+            // The previews play what the dialog shows, saved or not.
+            if (e.ControlName == CtlDemo)
             {
-                case CtlQuiet: host.SaveOption(TacitOptions.KeyQuietWindow, value); break;
-                case CtlHeartbeat: host.SaveOption(TacitOptions.KeyHeartbeat, value); break;
-                case CtlHeartbeatOn: host.SaveOption(TacitOptions.KeyHeartbeatOn, value); break;
-                case CtlContrast: host.SaveOption(TacitOptions.KeyHighContrast, value); break;
+                host.PlayDemoRun(shown);
+                return;
             }
 
             // Changing the contrast changes what the demo feels like, so it is
@@ -189,7 +242,34 @@
             // about it.
             if (e.ControlName == CtlContrast)
             {
-                host.PlayContrastSample();
+                host.PlayContrastSample(shown);
+            }
+        }
+
+        // SAVE makes what the dialog shows the running settings. CANCEL, and
+        // closing the dialog any other way, report IsCanceled and change nothing.
+        //
+        // A cancel must not discard what the dialog shows. Options+ also reports
+        // a cancel when a dialog closes after SAVE, sometimes on another thread,
+        // so the two can arrive in either order. The next Started
+        // replaces the held values instead.
+        private void OnEditorFinished(Object sender, ActionEditorFinishedEventArgs e)
+        {
+            PluginLog.Info($"[tacit] EDITOR finished: {(e.IsCanceled ? "cancelled" : "saved")}");
+            if (e.IsCanceled)
+            {
+                return;
+            }
+
+            TacitOptions shown;
+            lock (this._edit)
+            {
+                shown = this._shown;
+            }
+
+            if (shown != null)
+            {
+                this.Host?.SaveOptions(shown);
             }
         }
 

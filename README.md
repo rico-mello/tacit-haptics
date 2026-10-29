@@ -124,6 +124,9 @@ The panel holds four controls and a button:
 - **Play a run**: plays the ~29-second teaching run, the same as writing
   `demo`.
 
+SAVE applies what the panel shows, and CANCEL leaves Tacit running as it was.
+A ring slot saved before 1.0.3 opens on the values it was saved with.
+
 ## Design notes
 
 - **Rhythm, not amplitude.** Users control intensity globally in Options+;

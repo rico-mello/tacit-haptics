@@ -115,15 +115,27 @@ namespace Loupedeck.TacitPlugin
 
         public TimeSpan NeedsInputFloor => TimeSpan.FromSeconds(this.HighContrast ? 3 : 4);
 
-        public static TacitOptions Load(Func<String, String> read)
+        public static TacitOptions Load(Func<String, String> read) => Load(read, new TacitOptions());
+
+        // `fallback` answers for every key `read` cannot.
+        public static TacitOptions Load(Func<String, String> read, TacitOptions fallback)
         {
             var o = new TacitOptions();
-            o.QuietWindowSeconds = ReadInt(read, KeyQuietWindow, o.QuietWindowSeconds);
-            o.HeartbeatSeconds = ReadInt(read, KeyHeartbeat, o.HeartbeatSeconds);
-            o.HeartbeatEnabled = ReadBool(read, KeyHeartbeatOn, o.HeartbeatEnabled);
-            o.HighContrast = ReadBool(read, KeyHighContrast, o.HighContrast);
+            o.QuietWindowSeconds = ReadInt(read, KeyQuietWindow, fallback.QuietWindowSeconds);
+            o.HeartbeatSeconds = ReadInt(read, KeyHeartbeat, fallback.HeartbeatSeconds);
+            o.HeartbeatEnabled = ReadBool(read, KeyHeartbeatOn, fallback.HeartbeatEnabled);
+            o.HighContrast = ReadBool(read, KeyHighContrast, fallback.HighContrast);
             return o;
         }
+
+        // The four settings as the plugin stores them: the editor's own strings.
+        public IEnumerable<(String Key, String Value)> Settings() => new[]
+        {
+            (KeyQuietWindow, this.QuietWindowSeconds.ToString()),
+            (KeyHeartbeat, this.HeartbeatSeconds.ToString()),
+            (KeyHeartbeatOn, this.HeartbeatEnabled.ToString()),
+            (KeyHighContrast, this.HighContrast.ToString()),
+        };
 
         private static Int32 ReadInt(Func<String, String> read, String key, Int32 fallback) =>
             Int32.TryParse(read(key), out var v) ? v : fallback;
