@@ -12,7 +12,11 @@
 
 displayName: Tacit
 description: State of a long-running task, reported through the thumb
-iconFile: DefaultEventSource.svg
+
+# No iconFile, on purpose. Options+ draws an event source's icon in its list
+# of haptic plugins, and without one the service uses the plugin icon,
+# metadata/Icon256x256.png. Until 1.0.3 this named DefaultEventSource.svg, a
+# placeholder waveform, and the list drew that instead.
 events:
     - name: taskStarted
       displayName: Task started
